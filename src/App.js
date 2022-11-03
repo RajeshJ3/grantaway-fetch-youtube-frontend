@@ -1,5 +1,7 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
+
+import axios from "axios";
+
 import { BASE_URL } from "./utils";
 
 export default function App() {
@@ -38,14 +40,25 @@ export default function App() {
     axios({
       url: `${BASE_URL}/post/${video.pk}`,
       method: "GET",
-    }).then(() => alert(`"${video.video_title}" posted`));
+    }).then((res) => {
+      const updatedVideos = videos.map((video, index) => {
+        if (video.pk === res.data.pk) {
+          return res.data;
+        }
+        return video;
+      });
+      setVideos(updatedVideos);
+    });
   };
 
   const deleteVideo = (video) => {
     axios({
       url: `${BASE_URL}/${video.pk}`,
       method: "DELETE",
-    }).then(() => alert(`"${video.video_title}" deleted`));
+    }).then((res) => {
+      const updatedVideos = videos.filter((i) => i.pk !== video.pk);
+      setVideos(updatedVideos);
+    });
   };
 
   return (
@@ -53,12 +66,24 @@ export default function App() {
       <button onClick={refresh}>Refresh</button>
       <button onClick={fetchMore}>Fetch More</button>
 
-      <p><b>Total: </b>{videos.length}</p>
+      <p>
+        <b>Total: </b>
+        {videos.length}
+      </p>
 
       {loading
         ? "loading.."
         : videos.map((video, index) => (
-            <div key={index}>
+            <div
+              key={index}
+              style={{
+                backgroundColor: video.is_posted ? "orange" : "green",
+                color: "white",
+                fontWeight: "bold",
+                padding: "5px 5px 10px 5px",
+                borderBottom: "2px solid #000",
+              }}
+            >
               <p>
                 <b>#{index}</b> {video.video_title}
               </p>
